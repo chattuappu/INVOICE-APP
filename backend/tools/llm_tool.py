@@ -23,8 +23,7 @@ _client: genai.Client | None = None
 def _get_client() -> genai.Client:
     global _client
     if _client is None:
-        genai.configure(api_key=GEMINI_API_KEY)
-        _client = genai.Client()
+        _client = genai.Client(api_key=GEMINI_API_KEY)
     return _client
 
 

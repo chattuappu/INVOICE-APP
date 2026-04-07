@@ -38,10 +38,11 @@ function statusBadge(status) {
   return `<span class="badge badge-${status}">${labels[status] || status}</span>`;
 }
 
-// ─── Confidence dot ───────────────────────────────────────────
-function confDot(conf) {
+// ─── Confidence tag ───────────────────────────────────────────
+function confTag(conf) {
   const cls = conf >= 0.8 ? 'conf-high' : conf >= 0.5 ? 'conf-medium' : 'conf-low';
-  return `<span class="conf-dot ${cls}" title="Confidence: ${(conf*100).toFixed(0)}%"></span>`;
+  const pct = (conf * 100).toFixed(0);
+  return `<span class="conf-score ${cls}" title="Confidence: ${pct}%">${pct}%</span>`;
 }
 
 // ─── Field label prettifier ────────────────────────────────────
@@ -222,7 +223,7 @@ function renderFields(doc) {
       <td class="field-value">
         <span class="fv-display">
           ${val || '<span style="color:var(--text-muted)">—</span>'}
-          ${confDot(conf)}
+          ${confTag(conf)}
           ${edited ? '<span class="edited-tag">edited</span>' : ''}
         </span>
         <input class="fv-input hidden" type="text" value="${escHtml(val)}" data-original="${escHtml(val)}" />

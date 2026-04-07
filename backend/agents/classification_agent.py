@@ -11,7 +11,7 @@ from typing import Any
 from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from vertexai.generative_models import Content, Part
+from google.genai import types as genai_types
 
 from backend.config.gcp_config import GEMINI_MODEL
 from backend.tools.gcs_tool import upload_to_gcs_tool
@@ -87,14 +87,14 @@ async def run_classification_agent(
             async for event in runner.run_async(
                 user_id="system",
                 session_id=session.id,
-                new_message=Content(
+                new_message=genai_types.Content(
                     role="user",
-                    parts=[Part.from_text(f"Process this document batch: {payload}")],
+                    parts=[genai_types.Part(text=f"Process this document batch: {payload}")],
                 ),
             ):
                 if event.is_final_response() and event.content:
                     for part in event.content.parts:
-                        if part.text:
+                        if hasattr(part, 'text') and part.text:
                             response_text += part.text
 
             try:

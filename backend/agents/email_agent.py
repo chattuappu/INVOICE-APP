@@ -66,21 +66,20 @@ async def run_email_scan_agent() -> list[dict[str, Any]]:
             user_id="system",
         )
 
-        from vertexai.generative_models import Content, Part
+        from google.genai import types as genai_types
 
         response_text = ""
-        # Use run_async instead of run for proper async handling
         async for event in runner.run_async(
             user_id="system",
             session_id=session.id,
-            new_message=Content(
+            new_message=genai_types.Content(
                 role="user",
-                parts=[Part.from_text("Scan the inbox and return discovered documents as JSON.")],
+                parts=[genai_types.Part(text="Scan the inbox and return discovered documents as JSON.")],
             ),
         ):
             if event.is_final_response() and event.content:
                 for part in event.content.parts:
-                    if part.text:
+                    if hasattr(part, 'text') and part.text:
                         response_text += part.text
 
         import json

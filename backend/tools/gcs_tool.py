@@ -96,21 +96,27 @@ def _generate_signed_url_impl(blob_name: str, expiration_minutes: int = 60) -> d
 
 # ─── Download ────────────────────────────────────────────────────────────────────
 
-def download_from_gcs(blob_name: str, local_path: str) -> dict[str, Any]:
+def download_from_gcs(blob_name: str) -> dict[str, Any]:
     """
-    Download a GCS blob to a local file path (used by the Processing Agent).
+    Download a GCS blob to a temporary local file path (used by the Processing Agent).
 
     Args:
         blob_name:  Full blob path inside the bucket.
-        local_path: Where to save the file locally.
 
     Returns:
         {"local_path": str, "error": None | str}
     """
     try:
+        import tempfile
         client = get_storage_client()
         bucket = client.bucket(GCS_BUCKET_NAME)
         blob = bucket.blob(blob_name)
+
+        # Generate a safe temporary path based on the original filename
+        filename = os.path.basename(blob_name)
+        temp_dir = tempfile.gettempdir()
+        local_path = os.path.join(temp_dir, filename)
+
         blob.download_to_filename(local_path)
         logger.info("Downloaded %s → %s", blob_name, local_path)
         return {"local_path": local_path, "error": None}

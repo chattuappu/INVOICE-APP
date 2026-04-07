@@ -12,7 +12,7 @@ from typing import Any
 from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from vertexai.generative_models import Content, Part
+from google.genai import types as genai_types
 
 from backend.config.gcp_config import GEMINI_MODEL
 from backend.tools.gcs_tool import download_from_gcs_tool
@@ -23,7 +23,6 @@ from backend.config.gcp_config import HIGH_CONFIDENCE_THRESHOLD
 
 logger = logging.getLogger(__name__)
 
-# ─── System Instruction ───────────────────────────────────────────────────────────
 PROCESSING_AGENT_INSTRUCTION = f"""
 You are the Processing Agent.
 
@@ -31,11 +30,18 @@ Task: Download, extract, and process a document.
 
 Input: A JSON object with document_id and blob_name.
 
+Status Determination Logic:
+1. Completeness and Confidence: EVERY field in the extraction result must NOT be empty AND must have a confidence >= {HIGH_CONFIDENCE_THRESHOLD}.
+2. Decision:
+   - If ALL fields are non-empty AND have confidence >= {HIGH_CONFIDENCE_THRESHOLD}: Set status to "complete" (sent to ERP).
+   - If ANY field is empty OR has confidence < {HIGH_CONFIDENCE_THRESHOLD}: Set status to "pending" (exception).
+
 Steps:
 1. Call download_from_gcs with: blob_name
-2. Call extract_document_fields with: local_path (from download)
-3. Call update_extracted_data with: document_id, extracted_fields, status="complete"
-4. Return: {{"document_id": "<id>", "status": "complete", "fields_count": <count>}}
+2. Call extract_document_fields with: local_path (the path returned from the download step)
+3. Analyze the 'fields' from extract_document_fields based on the Status Determination Logic above.
+4. Call update_extracted_data with: document_id, extracted_fields, status (the determined status)
+5. Return: {{"document_id": "<id>", "status": "<status>", "fields_count": <count>}}
 
 Respond ONLY with the JSON result.
 """
@@ -90,14 +96,14 @@ async def run_processing_agent(records: list[dict[str, Any]]) -> list[dict[str, 
             async for event in runner.run_async(
                 user_id="system",
                 session_id=session.id,
-                new_message=Content(
+                new_message=genai_types.Content(
                     role="user",
-                    parts=[Part.from_text(f"Process this document: {payload}")],
+                    parts=[genai_types.Part(text=f"Process this document: {payload}")],
                 ),
             ):
                 if event.is_final_response() and event.content:
                     for part in event.content.parts:
-                        if part.text:
+                        if hasattr(part, 'text') and part.text:
                             response_text += part.text
 
             try:
