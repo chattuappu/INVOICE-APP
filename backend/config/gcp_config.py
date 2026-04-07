@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from google.oauth2 import service_account
-from google.cloud import firestore, storage
+from google.cloud import datastore, storage
 
 # Load .env file before reading environment variables
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
@@ -37,8 +37,8 @@ GCS_SALES_TAX_PREFIX = "SALES_TAX/"
 DOCUMENT_AI_PROCESSOR_ID = os.environ.get("DOCUMENT_AI_PROCESSOR_ID", "your-processor-id")
 DOCUMENT_AI_LOCATION = os.environ.get("DOCUMENT_AI_LOCATION", "us")
 
-# ─── Firestore Settings ─────────────────────────────────────────────────────────
-FIRESTORE_COLLECTION = os.environ.get("FIRESTORE_COLLECTION", "documents")
+# ─── Datastore Settings (Cloud Datastore / Firestore in Datastore Mode) ────────
+DATASTORE_KIND = os.environ.get("FIRESTORE_COLLECTION", "documents")
 
 # ─── Email Settings ─────────────────────────────────────────────────────────────
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "imap.gmail.com")
@@ -57,9 +57,10 @@ HIGH_CONFIDENCE_THRESHOLD = 0.80
 
 # ─── Client Factories ───────────────────────────────────────────────────────────
 
-def get_firestore_client():
+def get_datastore_client():
+    """Get authenticated Datastore client."""
     creds = get_credentials()
-    return firestore.Client(project=PROJECT_ID, credentials=creds)
+    return datastore.Client(project=PROJECT_ID, credentials=creds)
 
 
 def get_storage_client():

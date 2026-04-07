@@ -1,6 +1,6 @@
 """
 seed_mock_data.py – Development / Demo helper
-Populates Firestore with realistic mock invoice records so you can
+Populates Datastore with realistic mock invoice records so you can
 test the frontend without running the full email pipeline.
 
 Usage:
@@ -15,7 +15,8 @@ from datetime import datetime, timezone
 # Allow running from project root
 sys.path.insert(0, os.path.dirname(__file__))
 
-from backend.config.gcp_config import get_firestore_client, FIRESTORE_COLLECTION
+from google.cloud import datastore
+from backend.config.gcp_config import get_datastore_client, DATASTORE_KIND
 
 MOCK_INVOICES = [
     {
@@ -124,18 +125,21 @@ MOCK_INVOICES = [
 
 
 def seed():
-    print("Connecting to Firestore…")
-    db = get_firestore_client()
-    col = db.collection(FIRESTORE_COLLECTION)
+    print("Connecting to Datastore…")
+    client = get_datastore_client()
     now = datetime.now(timezone.utc).isoformat()
 
     for doc in MOCK_INVOICES:
         doc["created_at"] = now
         doc["updated_at"] = now
-        col.document(doc["document_id"]).set(doc)
+        
+        key = client.key(DATASTORE_KIND, doc["document_id"])
+        entity = datastore.Entity(key=key)
+        entity.update(doc)
+        client.put(entity)
         print(f"  ✅  Seeded {doc['filename']} ({doc['type']}, {doc['status']})")
 
-    print(f"\nSeeded {len(MOCK_INVOICES)} documents into '{FIRESTORE_COLLECTION}' collection.")
+    print(f"\nSeeded {len(MOCK_INVOICES)} documents into '{DATASTORE_KIND}' kind.")
 
 
 if __name__ == "__main__":

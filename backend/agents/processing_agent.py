@@ -45,7 +45,7 @@ Respond ONLY with the JSON result.
 processing_agent = Agent(
     name="processing_agent",
     model=GEMINI_MODEL,
-    description="Extracts structured data from documents via Document AI and updates Firestore.",
+    description="Extracts structured data from documents via Document AI and updates Datastore.",
     instruction=PROCESSING_AGENT_INSTRUCTION,
     tools=[download_from_gcs_tool, extract_document_fields_tool, update_extracted_data_tool],
 )

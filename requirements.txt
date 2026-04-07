@@ -2,7 +2,7 @@
 google-adk
 
 # ── Google Cloud SDKs ───────────────────────────────────────────
-google-cloud-firestore
+google-cloud-datastore
 google-cloud-storage
 google-cloud-documentai
 google-auth

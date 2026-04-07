@@ -1,17 +1,18 @@
 """
-Firestore Tool – ADK Tool
-All Firestore reads and writes are routed through this module.
+Datastore Tool – ADK Tool
+All Datastore reads and writes are routed through this module.
+(Using Google Cloud Datastore / Firestore in Datastore Mode)
 """
 import logging
 from datetime import datetime, timezone
 from typing import Any
 
 from google.adk.tools import FunctionTool
-from google.cloud import firestore
+from google.cloud import datastore
 
 from backend.config.gcp_config import (
-    FIRESTORE_COLLECTION,
-    get_firestore_client,
+    DATASTORE_KIND,
+    get_datastore_client,
 )
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ def create_document_record(
     filename: str,
 ) -> dict[str, Any]:
     """
-    Create a new Firestore document record.
+    Create a new Datastore entity record.
 
     Args:
         document_id:    Unique ID for the document.
@@ -40,9 +41,12 @@ def create_document_record(
         {"success": bool, "document_id": str, "error": None | str}
     """
     try:
-        db = get_firestore_client()
+        client = get_datastore_client()
         now = datetime.now(timezone.utc).isoformat()
-        data = {
+        
+        key = client.key(DATASTORE_KIND, document_id)
+        entity = datastore.Entity(key=key)
+        entity.update({
             "document_id": document_id,
             "type": document_type,
             "file_path": file_path,
@@ -52,13 +56,13 @@ def create_document_record(
             "status": "pending",
             "created_at": now,
             "updated_at": now,
-        }
-        db.collection(FIRESTORE_COLLECTION).document(document_id).set(data)
-        logger.info("Created Firestore record for %s", document_id)
+        })
+        client.put(entity)
+        logger.info("Created Datastore record for %s", document_id)
         return {"success": True, "document_id": document_id, "error": None}
 
     except Exception as exc:
-        logger.exception("Firestore create failed: %s", exc)
+        logger.exception("Datastore create failed: %s", exc)
         return {"success": False, "document_id": document_id, "error": str(exc)}
 
 
@@ -70,10 +74,10 @@ def update_extracted_data(
     status: str,
 ) -> dict[str, Any]:
     """
-    Update the extracted_data and status for an existing Firestore document.
+    Update the extracted_data and status for an existing Datastore entity.
 
     Args:
-        document_id:    Firestore document ID.
+        document_id:    Datastore entity ID.
         extracted_data: Dict of field → {value, confidence, manually_edited}.
         status:         'pending', 'in_progress', or 'complete'.
 
@@ -81,46 +85,60 @@ def update_extracted_data(
         {"success": bool, "error": None | str}
     """
     try:
-        db = get_firestore_client()
+        client = get_datastore_client()
         now = datetime.now(timezone.utc).isoformat()
-        db.collection(FIRESTORE_COLLECTION).document(document_id).update(
-            {
-                "extracted_data": extracted_data,
-                "status": status,
-                "updated_at": now,
-            }
-        )
+        
+        key = client.key(DATASTORE_KIND, document_id)
+        entity = client.get(key)
+        
+        if not entity:
+            return {"success": False, "error": "Entity not found"}
+        
+        entity["extracted_data"] = extracted_data
+        entity["status"] = status
+        entity["updated_at"] = now
+        
+        client.put(entity)
         logger.info("Updated extracted data for %s → status=%s", document_id, status)
         return {"success": True, "error": None}
 
     except Exception as exc:
-        logger.exception("Firestore update failed: %s", exc)
+        logger.exception("Datastore update failed: %s", exc)
         return {"success": False, "error": str(exc)}
+
 
 
 # ─── Update Status Only ───────────────────────────────────────────────────────────
 
 def _update_status_impl(document_id: str, status: str) -> dict[str, Any]:
     """
-    Update only the status field of a Firestore document.
+    Update only the status field of a Datastore entity.
 
     Args:
-        document_id: Firestore document ID.
+        document_id: Datastore entity ID.
         status:      New status value.
 
     Returns:
         {"success": bool, "error": None | str}
     """
     try:
-        db = get_firestore_client()
+        client = get_datastore_client()
         now = datetime.now(timezone.utc).isoformat()
-        db.collection(FIRESTORE_COLLECTION).document(document_id).update(
-            {"status": status, "updated_at": now}
-        )
+        
+        key = client.key(DATASTORE_KIND, document_id)
+        entity = client.get(key)
+        
+        if not entity:
+            return {"success": False, "error": "Entity not found"}
+        
+        entity["status"] = status
+        entity["updated_at"] = now
+        
+        client.put(entity)
         return {"success": True, "error": None}
 
     except Exception as exc:
-        logger.exception("Firestore status update failed: %s", exc)
+        logger.exception("Datastore status update failed: %s", exc)
         return {"success": False, "error": str(exc)}
 
 
@@ -128,7 +146,7 @@ def _update_status_impl(document_id: str, status: str) -> dict[str, Any]:
 
 def _get_all_documents_impl(document_type: str | None = None) -> dict[str, Any]:
     """
-    Retrieve all documents, optionally filtered by type.
+    Retrieve all entities, optionally filtered by type.
 
     Args:
         document_type: 'invoice', 'sales_tax', or None for all.
@@ -137,16 +155,17 @@ def _get_all_documents_impl(document_type: str | None = None) -> dict[str, Any]:
         {"documents": list[dict], "error": None | str}
     """
     try:
-        db = get_firestore_client()
-        query = db.collection(FIRESTORE_COLLECTION)
+        client = get_datastore_client()
+        query = client.query(kind=DATASTORE_KIND)
+        
         if document_type:
-            query = query.where("type", "==", document_type)
+            query.add_filter("type", "=", document_type)
 
-        docs = [d.to_dict() for d in query.stream()]
+        docs = [dict(entity) for entity in query.fetch()]
         return {"documents": docs, "error": None}
 
     except Exception as exc:
-        logger.exception("Firestore get_all failed: %s", exc)
+        logger.exception("Datastore get_all failed: %s", exc)
         return {"documents": [], "error": str(exc)}
 
 
@@ -154,20 +173,22 @@ def _get_all_documents_impl(document_type: str | None = None) -> dict[str, Any]:
 
 def _get_document_impl(document_id: str) -> dict[str, Any]:
     """
-    Retrieve a single document by ID.
+    Retrieve a single entity by ID.
 
     Returns:
         {"document": dict | None, "error": None | str}
     """
     try:
-        db = get_firestore_client()
-        doc = db.collection(FIRESTORE_COLLECTION).document(document_id).get()
-        if doc.exists:
-            return {"document": doc.to_dict(), "error": None}
+        client = get_datastore_client()
+        key = client.key(DATASTORE_KIND, document_id)
+        entity = client.get(key)
+        
+        if entity:
+            return {"document": dict(entity), "error": None}
         return {"document": None, "error": "Not found"}
 
     except Exception as exc:
-        logger.exception("Firestore get_document failed: %s", exc)
+        logger.exception("Datastore get_document failed: %s", exc)
         return {"document": None, "error": str(exc)}
 
 
@@ -180,21 +201,21 @@ def _save_manual_edits_impl(
     Save human-edited field values and set status to 'in_progress'.
 
     Args:
-        document_id: Firestore document ID.
+        document_id: Datastore entity ID.
         edits:       {field_name: new_value, ...}
 
     Returns:
         {"success": bool, "error": None | str}
     """
     try:
-        db = get_firestore_client()
-        doc_ref = db.collection(FIRESTORE_COLLECTION).document(document_id)
-        doc = doc_ref.get()
-        if not doc.exists:
-            return {"success": False, "error": "Document not found"}
+        client = get_datastore_client()
+        key = client.key(DATASTORE_KIND, document_id)
+        entity = client.get(key)
+        
+        if not entity:
+            return {"success": False, "error": "Entity not found"}
 
-        data = doc.to_dict()
-        extracted = data.get("extracted_data", {})
+        extracted = entity.get("extracted_data", {})
 
         for field, new_val in edits.items():
             if field in extracted:
@@ -208,17 +229,15 @@ def _save_manual_edits_impl(
                 }
 
         now = datetime.now(timezone.utc).isoformat()
-        doc_ref.update(
-            {
-                "extracted_data": extracted,
-                "status": "in_progress",
-                "updated_at": now,
-            }
-        )
+        entity["extracted_data"] = extracted
+        entity["status"] = "in_progress"
+        entity["updated_at"] = now
+        
+        client.put(entity)
         return {"success": True, "error": None}
 
     except Exception as exc:
-        logger.exception("Firestore manual edit save failed: %s", exc)
+        logger.exception("Datastore manual edit save failed: %s", exc)
         return {"success": False, "error": str(exc)}
 
 
