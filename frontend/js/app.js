@@ -64,7 +64,7 @@ async function loadDocuments() {
   } catch (err) {
     console.error('Load documents failed:', err);
     $('tableBody').innerHTML = `
-      <tr class="empty-row"><td colspan="9">
+      <tr class="empty-row"><td colspan="10">
         <div class="empty-state">
           <div class="empty-icon">⬡</div>
           <p>Failed to load documents. Is the backend running?</p>
@@ -100,7 +100,7 @@ function renderTable() {
 
   if (!docs.length) {
     body.innerHTML = `
-      <tr class="empty-row"><td colspan="9">
+      <tr class="empty-row"><td colspan="10">
         <div class="empty-state">
           <div class="empty-icon">⬡</div>
           <p>No documents found.</p>
@@ -113,6 +113,23 @@ function renderTable() {
     const ed = doc.extracted_data || {};
     const val = (f) => ed[f]?.value || '—';
     const filename = doc.filename || doc.document_id;
+    
+    const fieldKeys = Object.keys(ed);
+    let avgConf = 0;
+    if (fieldKeys.length > 0) {
+      const totalConf = fieldKeys.reduce((sum, k) => sum + (ed[k].confidence || 0), 0);
+      avgConf = totalConf / fieldKeys.length;
+    }
+    const colorKey = avgConf >= 0.8 ? 'green' : avgConf >= 0.5 ? 'yellow' : 'red';
+    const borderColor = colorKey === 'green' ? 'rgba(34,197,94,.3)' : colorKey === 'yellow' ? 'rgba(245,158,11,.3)' : 'rgba(239,68,68,.3)';
+    const pctStr = (avgConf * 100).toFixed(0);
+    const confHTML = `
+      <div style="display:flex; flex-direction:column; gap:6px; max-width:70px;">
+        <span class="badge" style="width:fit-content; background:var(--${colorKey}-bg); color:var(--${colorKey}); border:1px solid ${borderColor};">${pctStr}%</span>
+        <div style="height:4px; width:100%; background:var(--border2); border-radius:2px; overflow:hidden;">
+          <div style="height:100%; width:${pctStr}%; background:var(--${colorKey}); transition:width 0.3s ease;"></div>
+        </div>
+      </div>`;
 
     return `
     <tr>
@@ -123,6 +140,7 @@ function renderTable() {
       <td>${val('vendor_address')}</td>
       <td>${val('net_amount')}</td>
       <td>${val('grand_total')}</td>
+      <td>${confHTML}</td>
       <td>${statusBadge(doc.status)}</td>
       <td>
         <button class="btn-view" data-id="${doc.document_id}">View</button>
