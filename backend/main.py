@@ -111,6 +111,13 @@ def trigger_pipeline(background_tasks: BackgroundTasks):
     return {"message": "Pipeline cycle triggered in background"}
 
 
+@app.post("/api/pipeline/sync-bucket")
+def sync_bucket(background_tasks: BackgroundTasks):
+    """Scan the configured GCS bucket for new PDFs and process them."""
+    background_tasks.add_task(pipeline.run_bucket_scan_once)
+    return {"message": "GCS bucket sync triggered in background"}
+
+
 @app.get("/api/health")
 def health():
     return {"status": "ok"}

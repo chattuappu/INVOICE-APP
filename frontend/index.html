@@ -21,10 +21,16 @@
         <button class="tab active" data-tab="invoice">Invoice</button>
         <button class="tab" data-tab="sales_tax">Sales Tax Exempt</button>
       </nav>
-      <button class="btn-trigger" id="triggerPipeline" title="Run pipeline now">
-        <span class="spinner hidden" id="pipelineSpinner"></span>
-        <span id="triggerLabel">↺ Sync</span>
-      </button>
+      <div class="header-actions">
+        <button class="btn-trigger" id="syncBucket" title="Import PDFs from GCS bucket">
+          <span class="spinner hidden" id="bucketSpinner"></span>
+          <span id="bucketLabel">⇣ Import</span>
+        </button>
+        <button class="btn-trigger" id="triggerPipeline" title="Run pipeline now">
+          <span class="spinner hidden" id="pipelineSpinner"></span>
+          <span id="triggerLabel">↺ Sync</span>
+        </button>
+      </div>
     </div>
   </header>
 

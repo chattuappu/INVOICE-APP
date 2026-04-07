@@ -335,6 +335,24 @@ async function triggerPipeline() {
   }
 }
 
+async function syncBucketFromGcs() {
+  const spinner = $('bucketSpinner');
+  const label = $('bucketLabel');
+  show(spinner);
+  label.textContent = 'Importing…';
+  try {
+    const res = await fetch(`${API}/pipeline/sync-bucket`, { method: 'POST' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    toast('GCS bucket import started.');
+    setTimeout(loadDocuments, 5000);
+  } catch (err) {
+    toast('Failed to import from GCS bucket.');
+  } finally {
+    hide(spinner);
+    label.textContent = '⇣ Import';
+  }
+}
+
 // ─── Tab switching ────────────────────────────────────────────
 function setActiveTab(tab) {
   state.activeTab = tab;
@@ -390,6 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Pipeline trigger
   $('triggerPipeline').addEventListener('click', triggerPipeline);
+  $('syncBucket').addEventListener('click', syncBucketFromGcs);
 
   // Modal close
   $('modalClose').addEventListener('click', () => {

@@ -5,7 +5,7 @@ client = storage.Client.from_service_account_json("service.json")
 bucket = client.bucket("invoice-exception-usecase")
 
 files = [
-    "./documents/Invoice_test.pdf"
+    "./documents/InvoiceTest2.pdf"
 ]
 
 root_prefix = "amal_gopi/"
