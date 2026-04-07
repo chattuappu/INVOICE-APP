@@ -290,16 +290,23 @@ function exitEditMode() {
 // ─── Save edits ───────────────────────────────────────────────
 async function saveEdits() {
   const edits = {};
+  let hasEmptyField = false;
+
   $('fieldsBody').querySelectorAll('[data-field]').forEach(row => {
     const field = row.dataset.field;
     const input = row.querySelector('.fv-input');
-    if (input && input.value !== input.dataset.original) {
-      edits[field] = input.value;
+    if (input) {
+      if (!input.value.trim()) {
+        hasEmptyField = true;
+      }
+      if (input.value !== input.dataset.original) {
+        edits[field] = input.value;
+      }
     }
   });
 
-  if (!Object.keys(edits).length) {
-    toast('No changes to save.');
+  if (hasEmptyField) {
+    toast('Cannot save. All fields must be filled.');
     return;
   }
 
