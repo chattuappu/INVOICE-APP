@@ -1,0 +1,22 @@
+# ── Google ADK ──────────────────────────────────────────────────
+google-adk
+
+# ── Google Cloud SDKs ───────────────────────────────────────────
+google-cloud-firestore
+google-cloud-storage
+google-cloud-documentai
+google-auth
+google-auth-httplib2
+
+# ── Vertex AI / Generative AI ────────────────────────────────────
+google-cloud-aiplatform
+vertexai
+
+# ── Web Framework ────────────────────────────────────────────────
+fastapi
+uvicorn[standard]
+python-multipart
+
+# ── Utilities ────────────────────────────────────────────────────
+pydantic
+python-dotenv

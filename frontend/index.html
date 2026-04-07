@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice Processing Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">⬡</span>
+        <span class="brand-name">DocFlow</span>
+      </div>
+      <nav class="tabs" id="mainTabs">
+        <button class="tab active" data-tab="invoice">Invoice</button>
+        <button class="tab" data-tab="sales_tax">Sales Tax Exempt</button>
+      </nav>
+      <button class="btn-trigger" id="triggerPipeline" title="Run pipeline now">
+        <span class="spinner hidden" id="pipelineSpinner"></span>
+        <span id="triggerLabel">↺ Sync</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <!-- Dashboard title -->
+    <div class="page-header">
+      <h1 class="page-title" id="pageTitle">Invoice — Dashboard</h1>
+      <div class="live-dot" title="Live"></div>
+    </div>
+
+    <!-- Summary cards -->
+    <section class="cards" id="summaryCards">
+      <div class="card" id="cardTotal">
+        <span class="card-label">TOTAL</span>
+        <span class="card-value" id="totalCount">—</span>
+      </div>
+      <div class="card card-green" id="cardComplete">
+        <span class="card-label">SENT TO ERP</span>
+        <span class="card-value" id="completeCount">—</span>
+        <button class="card-btn" data-filter="complete">View Completed</button>
+      </div>
+      <div class="card card-red" id="cardPending">
+        <span class="card-label">EXCEPTIONS</span>
+        <span class="card-value" id="pendingCount">—</span>
+        <button class="card-btn" data-filter="pending">View Exceptions</button>
+      </div>
+      <div class="card card-yellow" id="cardInProgress">
+        <span class="card-label">IN PROGRESS</span>
+        <span class="card-value" id="inProgressCount">—</span>
+        <button class="card-btn" data-filter="in_progress">View In Progress</button>
+      </div>
+    </section>
+
+    <!-- Filter bar -->
+    <div class="table-header">
+      <h2 class="table-title" id="tableTitle">All Invoices</h2>
+      <div class="filter-pills" id="filterPills">
+        <button class="pill active" data-filter="all">All</button>
+        <button class="pill" data-filter="complete">Completed</button>
+        <button class="pill" data-filter="pending">Exceptions</button>
+        <button class="pill" data-filter="in_progress">In Progress</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="data-table" id="mainTable">
+        <thead>
+          <tr>
+            <th>FILE</th>
+            <th>INVOICE ID</th>
+            <th>INVOICE DATE</th>
+            <th>CUSTOMER ADDRESS</th>
+            <th>VENDOR ADDRESS</th>
+            <th>NET AMOUNT</th>
+            <th>GRAND TOTAL</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="empty-row">
+            <td colspan="9">
+              <div class="empty-state">
+                <div class="empty-icon">⬡</div>
+                <p>Loading documents…</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- ── Detail Modal ── -->
+  <div class="modal-overlay hidden" id="detailModal">
+    <div class="modal">
+      <button class="modal-close" id="modalClose">✕</button>
+
+      <div class="modal-tabs">
+        <button class="tab active" data-tab="invoice" id="modalTabInvoice">Invoice</button>
+        <button class="tab" data-tab="sales_tax" id="modalTabSalesTax">Sales Tax Exempt</button>
+      </div>
+
+      <div class="modal-filename" id="modalFilename"></div>
+
+      <div class="modal-body">
+        <!-- Left: PDF viewer -->
+        <div class="pdf-pane">
+          <iframe id="pdfViewer" src="" title="Document PDF"></iframe>
+          <div class="pdf-actions">
+            <a class="btn-ghost" id="openPdfBtn" href="#" target="_blank">Open PDF ↗</a>
+          </div>
+        </div>
+
+        <!-- Right: Fields -->
+        <div class="fields-pane">
+          <div class="status-row">
+            <span class="status-badge" id="detailStatus">—</span>
+            <button class="btn-edit hidden" id="editBtn">Edit</button>
+            <button class="btn-submit hidden" id="submitBtn">Submit to ERP</button>
+          </div>
+
+          <table class="fields-table" id="fieldsTable">
+            <thead>
+              <tr><th>FIELD</th><th>VALUE</th></tr>
+            </thead>
+            <tbody id="fieldsBody"></tbody>
+          </table>
+
+          <div class="edit-actions hidden" id="editActions">
+            <button class="btn-save" id="saveBtn">Save Changes</button>
+            <button class="btn-cancel" id="cancelBtn">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
