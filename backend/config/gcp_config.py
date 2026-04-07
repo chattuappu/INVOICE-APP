@@ -30,8 +30,10 @@ LOCATION = os.environ.get("GCP_LOCATION", "us-central1")
 
 # ─── GCS Settings ───────────────────────────────────────────────────────────────
 GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME", "invoice-processing-bucket")
-GCS_INVOICE_PREFIX = "INVOICE/"
-GCS_SALES_TAX_PREFIX = "SALES_TAX/"
+GCS_ROOT_PREFIX = os.environ.get("GCS_ROOT_PREFIX", "amal_gopi").strip("/")
+GCS_ROOT_PREFIX = f"{GCS_ROOT_PREFIX}/" if GCS_ROOT_PREFIX else ""
+GCS_INVOICE_PREFIX = f"{GCS_ROOT_PREFIX}INVOICE/"
+GCS_SALES_TAX_PREFIX = f"{GCS_ROOT_PREFIX}SALES_TAX/"
 
 # ─── Document AI Settings ───────────────────────────────────────────────────────
 DOCUMENT_AI_PROCESSOR_ID = os.environ.get("DOCUMENT_AI_PROCESSOR_ID", "your-processor-id")

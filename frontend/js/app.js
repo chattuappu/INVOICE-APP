@@ -403,14 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === $('detailModal')) hide($('detailModal'));
   });
 
-  // Modal tabs (just visual — same document)
-  document.querySelectorAll('.modal-tabs .tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.modal-tabs .tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-    });
-  });
-
   // Edit button
   $('editBtn').addEventListener('click', enterEditMode);
 

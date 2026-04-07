@@ -22,8 +22,8 @@ MOCK_INVOICES = [
     {
         "document_id": str(uuid.uuid4()),
         "type": "invoice",
-        "file_path": "gs://demo-bucket/INVOICE/invoice1.pdf",
-        "blob_name": "INVOICE/invoice1.pdf",
+        "file_path": "gs://demo-bucket/amal_gopi/INVOICE/invoice1.pdf",
+        "blob_name": "amal_gopi/INVOICE/invoice1.pdf",
         "filename": "invoice1.pdf",
         "status": "pending",
         "extracted_data": {
@@ -39,8 +39,8 @@ MOCK_INVOICES = [
     {
         "document_id": str(uuid.uuid4()),
         "type": "invoice",
-        "file_path": "gs://demo-bucket/INVOICE/invoice2.pdf",
-        "blob_name": "INVOICE/invoice2.pdf",
+        "file_path": "gs://demo-bucket/amal_gopi/INVOICE/invoice2.pdf",
+        "blob_name": "amal_gopi/INVOICE/invoice2.pdf",
         "filename": "invoice2.pdf",
         "status": "pending",
         "extracted_data": {
@@ -56,8 +56,8 @@ MOCK_INVOICES = [
     {
         "document_id": str(uuid.uuid4()),
         "type": "invoice",
-        "file_path": "gs://demo-bucket/INVOICE/invoice3.pdf",
-        "blob_name": "INVOICE/invoice3.pdf",
+        "file_path": "gs://demo-bucket/amal_gopi/INVOICE/invoice3.pdf",
+        "blob_name": "amal_gopi/INVOICE/invoice3.pdf",
         "filename": "invoice3.pdf",
         "status": "complete",
         "extracted_data": {
@@ -73,8 +73,8 @@ MOCK_INVOICES = [
     {
         "document_id": str(uuid.uuid4()),
         "type": "invoice",
-        "file_path": "gs://demo-bucket/INVOICE/invoice4.pdf",
-        "blob_name": "INVOICE/invoice4.pdf",
+        "file_path": "gs://demo-bucket/amal_gopi/INVOICE/invoice4.pdf",
+        "blob_name": "amal_gopi/INVOICE/invoice4.pdf",
         "filename": "invoice4.pdf",
         "status": "in_progress",
         "extracted_data": {
@@ -90,8 +90,8 @@ MOCK_INVOICES = [
     {
         "document_id": str(uuid.uuid4()),
         "type": "sales_tax",
-        "file_path": "gs://demo-bucket/SALES_TAX/exemption1.pdf",
-        "blob_name": "SALES_TAX/exemption1.pdf",
+        "file_path": "gs://demo-bucket/amal_gopi/SALES_TAX/exemption1.pdf",
+        "blob_name": "amal_gopi/SALES_TAX/exemption1.pdf",
         "filename": "exemption1.pdf",
         "status": "complete",
         "extracted_data": {
@@ -107,8 +107,8 @@ MOCK_INVOICES = [
     {
         "document_id": str(uuid.uuid4()),
         "type": "sales_tax",
-        "file_path": "gs://demo-bucket/SALES_TAX/exemption2.pdf",
-        "blob_name": "SALES_TAX/exemption2.pdf",
+        "file_path": "gs://demo-bucket/amal_gopi/SALES_TAX/exemption2.pdf",
+        "blob_name": "amal_gopi/SALES_TAX/exemption2.pdf",
         "filename": "exemption2.pdf",
         "status": "pending",
         "extracted_data": {
