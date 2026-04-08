@@ -10,7 +10,7 @@ import time
 import uuid
 from typing import Any
 
-from backend.agents.email_agent import run_email_scan_agent
+from backend.service.email_scanner import scan_for_new_emails
 from backend.agents.classification_agent import run_classification_agent
 from backend.agents.processing_agent import run_processing_agent
 from backend.config.gcp_config import (
@@ -166,10 +166,10 @@ class InvoicePipeline:
         }
 
         # ── Step 1: Email Scan ──────────────────────────────────────────────────
-        logger.info("Step 1 – Email Scan Agent")
-        discovered = _with_retry(run_email_scan_agent)
+        logger.info("Step 1 – Python Email Scanner Service")
+        discovered = _with_retry(scan_for_new_emails)
         result["emails_discovered"] = len(discovered)
-        logger.info("Discovered %d document(s) from email.", len(discovered))
+        logger.info("Discovered %d email(s).", len(discovered))
 
         if not discovered:
             logger.info("No new documents found. Pipeline cycle complete.")

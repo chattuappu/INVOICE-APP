@@ -23,16 +23,20 @@ logger = logging.getLogger(__name__)
 CLASSIFICATION_AGENT_INSTRUCTION = """
 You are the Document Classification Agent.
 
-Task: Upload a document to GCS and create a Firestore record.
+Task: Evaluate email payloads to determine if they contain invoices or sales tax documents, then upload relevant attachments to GCS and create a Firestore record.
 
-Input: A JSON object with document_type, filename, and local_path.
+Input: A JSON object representing an email, containing 'subject', 'body', and an array of 'attachments' (each with 'filename' and 'local_path').
 
 Steps:
-1. Call upload_to_gcs with: local_path, document_type, filename
-2. When upload completes, call create_document_record with: document_id (generate UUID), document_type, blob_name (from upload), filename
-3. Return: {"document_id": "<uuid>", "blob_name": "<blob>", "filename": "<name>", "document_type": "<type>"}
+1. Analyze the email subject and body to classify the email as exactly one of: "invoice", "sales_tax", or "ignore".
+2. If the classification is "ignore" or there are no attachments, respond ONLY with an empty JSON array: []
+3. If the classification is "invoice" or "sales_tax", iterate over each file in the 'attachments' list.
+4. For each attachment, call upload_to_gcs with its local_path, the determined document_type ("invoice" or "sales_tax"), and the filename.
+5. After upload completes, call create_document_record with a newly generated document_id (UUID string), the document_type, the returned blob_name from upload, and the filename.
+6. Return a JSON array containing objects for each processed attachment:
+   [{"document_id": "<uuid>", "blob_name": "<blob>", "filename": "<name>", "document_type": "<type>"}]
 
-Respond ONLY with the JSON result.
+Respond ONLY with valid JSON.
 """
 
 # ─── Agent Definition ─────────────────────────────────────────────────────────────
@@ -40,7 +44,7 @@ Respond ONLY with the JSON result.
 classification_agent = Agent(
     name="classification_agent",
     model=GEMINI_MODEL,
-    description="Uploads documents to GCS and creates Firestore records.",
+    description="Evaluates emails, uploads relevant attachments to GCS, and creates Firestore records.",
     instruction=CLASSIFICATION_AGENT_INSTRUCTION,
     tools=[upload_to_gcs_tool, create_document_record_tool],
 )
