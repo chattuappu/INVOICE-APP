@@ -40,7 +40,7 @@ DOCUMENT_AI_PROCESSOR_ID = os.environ.get("DOCUMENT_AI_PROCESSOR_ID", "your-proc
 DOCUMENT_AI_LOCATION = os.environ.get("DOCUMENT_AI_LOCATION", "us")
 
 # ─── Datastore Settings (Cloud Datastore / Firestore in Datastore Mode) ────────
-DATASTORE_KIND = os.environ.get("FIRESTORE_COLLECTION", "documents")
+DATASTORE_KIND = os.environ.get("FIRESTORE_COLLECTION", "amal_gopi_documents")
 
 # ─── Email Settings ─────────────────────────────────────────────────────────────
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "imap.gmail.com")
