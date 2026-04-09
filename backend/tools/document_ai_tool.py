@@ -2,6 +2,9 @@
 Document AI Tool – ADK Tool
 Sends a document to Google Cloud Document AI and returns extracted fields
 with confidence scores.
+
+After extraction, any field whose confidence falls below HIGH_CONFIDENCE_THRESHOLD
+is automatically sent to Gemini for LLM-based verification and correction.
 """
 import logging
 import mimetypes
@@ -17,7 +20,9 @@ from backend.config.gcp_config import (
     DOCUMENT_AI_PROCESSOR_ID,
     DOCUMENT_AI_LOCATION,
     SERVICE_ACCOUNT_PATH,
+    HIGH_CONFIDENCE_THRESHOLD,
 )
+from backend.tools.llm_verification import verify_low_confidence_fields
 
 logger = logging.getLogger(__name__)
 
@@ -115,14 +120,28 @@ def extract_document_fields(local_path: str) -> dict[str, Any]:
                     "manually_edited": False,
                 }
 
+        raw_text = document.text[:3000] if document.text else ""
+
         logger.info(
             "Document AI extraction complete for %s. Fields: %s",
             local_path,
             list(extracted.keys()),
         )
+
+        # ── LLM Verification for low-confidence fields ────────────────────────
+        logger.info(
+            "Running LLM verification on fields with confidence < %.2f …",
+            HIGH_CONFIDENCE_THRESHOLD,
+        )
+        verified_fields = verify_low_confidence_fields(
+            fields=extracted,
+            raw_text=raw_text,
+            threshold=HIGH_CONFIDENCE_THRESHOLD,
+        )
+
         return {
-            "fields": extracted,
-            "raw_text": document.text[:2000] if document.text else "",
+            "fields": verified_fields,
+            "raw_text": raw_text,
             "error": None,
         }
 
