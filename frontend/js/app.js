@@ -234,6 +234,9 @@ function renderFields(doc) {
     const val = fieldData.value || '';
     const conf = fieldData.confidence || 0;
     const edited = fieldData.manually_edited;
+    const llmImproved = fieldData.llm_verified && typeof fieldData.confidence_before === 'number' && conf > fieldData.confidence_before;
+    const oldPct = llmImproved ? (fieldData.confidence_before * 100).toFixed(0) : null;
+    const newPct = llmImproved ? (conf * 100).toFixed(0) : null;
 
     return `
     <tr data-field="${key}">
@@ -241,9 +244,20 @@ function renderFields(doc) {
       <td class="field-value">
         <span class="fv-display">
           ${val || '<span style="color:var(--text-muted)">—</span>'}
-          ${confTag(conf)}
           ${edited ? '<span class="edited-tag">edited</span>' : ''}
         </span>
+        <div class="conf-meta">
+          ${confTag(conf)}
+          ${llmImproved ? `
+            <button class="llm-arrow" type="button" data-field="${key}" aria-label="Show confidence history">
+              ⬆
+            </button>
+            <div class="confidence-popup hidden" data-popup-for="${key}">
+              <div class="popup-title">LLM verification update</div>
+              <div class="popup-row"><span>Confidence</span>${oldPct}% → ${newPct}%</div>
+            </div>
+          ` : ''}
+        </div>
         <input class="fv-input hidden" type="text" value="${escHtml(val)}" data-original="${escHtml(val)}" />
       </td>
     </tr>`;
@@ -459,6 +473,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Submit button
   $('submitBtn').addEventListener('click', submitToERP);
+
+  // Close confidence popups when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.llm-arrow') && !e.target.closest('.confidence-popup')) {
+      document.querySelectorAll('.confidence-popup').forEach(popup => popup.classList.add('hidden'));
+    }
+  });
+
+  // Delegate click events for LLM confidence arrows
+  $('fieldsBody').addEventListener('click', (e) => {
+    const button = e.target.closest('.llm-arrow');
+    if (!button) return;
+    e.stopPropagation();
+    const field = button.dataset.field;
+    const popup = $('fieldsBody').querySelector(`[data-popup-for="${field}"]`);
+    if (!popup) return;
+
+    const wasOpen = !popup.classList.contains('hidden');
+    document.querySelectorAll('.confidence-popup').forEach(el => el.classList.add('hidden'));
+    if (!wasOpen) popup.classList.remove('hidden');
+  });
 
   // Initial load
   loadDocuments();

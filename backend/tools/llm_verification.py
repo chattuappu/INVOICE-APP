@@ -192,6 +192,7 @@ def verify_low_confidence_fields(
                 **field_data,
                 "value": llm_value,
                 "confidence": llm_confidence,
+                "confidence_before": original_confidence,
                 "llm_verified": True,
                 "llm_verification_attempted": True,
                 "llm_verification_failed": False,
