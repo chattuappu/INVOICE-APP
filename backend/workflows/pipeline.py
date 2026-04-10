@@ -10,7 +10,7 @@ import time
 import uuid
 from typing import Any
 
-from backend.service.email_scanner import scan_for_new_emails
+from backend.agents.email_scan_agent import run_email_scan_agent
 from backend.agents.classification_agent import run_classification_agent
 from backend.agents.processing_agent import run_processing_agent
 from backend.config.gcp_config import (
@@ -166,8 +166,8 @@ class InvoicePipeline:
         }
 
         # ── Step 1: Email Scan ──────────────────────────────────────────────────
-        logger.info("Step 1 – Python Email Scanner Service")
-        discovered = _with_retry(scan_for_new_emails)
+        logger.info("Step 1 – ADK Email Scan Agent")
+        discovered = _with_retry(run_email_scan_agent)
         result["emails_discovered"] = len(discovered)
         logger.info("Discovered %d email(s).", len(discovered))
 
