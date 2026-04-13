@@ -39,10 +39,11 @@ function statusBadge(status) {
 }
 
 // ─── Confidence tag ───────────────────────────────────────────
-function confTag(conf) {
+function confTag(conf, label) {
   const cls = conf >= 0.8 ? 'conf-high' : conf >= 0.5 ? 'conf-medium' : 'conf-low';
   const pct = (conf * 100).toFixed(0);
-  return `<span class="conf-score ${cls}" title="Confidence: ${pct}%">${pct}%</span>`;
+  const display = label || `${pct}%`;
+  return `<span class="conf-score ${cls}" title="Confidence: ${pct}%">${display}</span>`;
 }
 
 // ─── Field label prettifier ────────────────────────────────────
@@ -235,6 +236,9 @@ function renderFields(doc) {
     const conf = fieldData.confidence || 0;
     const edited = fieldData.manually_edited;
     const llmImproved = fieldData.llm_verified && typeof fieldData.confidence_before === 'number' && conf > fieldData.confidence_before;
+    const confidenceLabel = llmImproved
+      ? `${(fieldData.confidence_before * 100).toFixed(0)}% +${((conf - fieldData.confidence_before) * 100).toFixed(0)}%`
+      : null;
 
     return `
     <tr data-field="${key}">
@@ -245,7 +249,7 @@ function renderFields(doc) {
           ${edited ? '<span class="edited-tag">edited</span>' : ''}
         </span>
         <div class="conf-meta">
-          ${confTag(conf)}
+          ${confTag(conf, confidenceLabel)}
           ${llmImproved ? `<!-- <button class="llm-arrow" type="button" data-field="${key}" aria-label="Show confidence history">⬆</button> -->` : ''}
         </div>
         <input class="fv-input hidden" type="text" value="${escHtml(val)}" data-original="${escHtml(val)}" />
