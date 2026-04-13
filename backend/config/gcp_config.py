@@ -50,8 +50,14 @@ EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD", "your-app-password")
 EMAIL_FOLDER = os.environ.get("EMAIL_FOLDER", "INBOX")
 EMAIL_POLL_INTERVAL = int(os.environ.get("EMAIL_POLL_INTERVAL", "60"))  # seconds
 
+# SMTP Settings for notifications
+SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("SMTP_USER", EMAIL_USER)
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", EMAIL_PASSWORD)
+
 # ─── Gemini / GenAI Settings ────────────────────────────────────────────────────
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-pro")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 # ─── Confidence Thresholds ──────────────────────────────────────────────────────

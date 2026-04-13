@@ -511,9 +511,11 @@ body {
 
 /* ── Fields pane ───────────────────────────────────────────── */
 .fields-pane {
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .status-row {
@@ -523,6 +525,7 @@ body {
   gap: 10px;
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .status-badge {
@@ -565,6 +568,8 @@ body {
   width: 100%;
   border-collapse: collapse;
   flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .fields-table th {
@@ -655,16 +660,15 @@ body {
 }
 
 .confidence-popup {
-  position: absolute;
-  top: 28px;
-  right: 0;
+  position: fixed;
   min-width: 170px;
   background: var(--surface2);
   border: 1px solid var(--border2);
   border-radius: 10px;
   padding: 10px 12px;
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
-  z-index: 50;
+  z-index: 200;
+  pointer-events: auto;
 }
 
 .confidence-popup .popup-title {
@@ -710,6 +714,8 @@ body {
   display: flex;
   gap: 10px;
   background: var(--bg);
+  flex-shrink: 0;
+  z-index: 10;
 }
 
 .btn-save {

@@ -26,6 +26,7 @@ def create_document_record(
     file_path: str,
     blob_name: str,
     filename: str,
+    sender_email: str = "",
 ) -> dict[str, Any]:
     """
     Create a new Datastore entity record.
@@ -52,6 +53,7 @@ def create_document_record(
             "file_path": file_path,
             "blob_name": blob_name,
             "filename": filename,
+            "sender_email": sender_email,
             "extracted_data": {},
             "status": "pending",
             "created_at": now,
@@ -100,6 +102,17 @@ def update_extracted_data(
         
         client.put(entity)
         logger.info("Updated extracted data for %s → status=%s", document_id, status)
+
+        # Trigger notification if status is complete
+        if status == "complete":
+            from backend.tools.notification_tool import send_completion_notification
+            send_completion_notification(
+                recipient_email=entity.get("sender_email", ""),
+                document_id=document_id,
+                filename=entity.get("filename", "document"),
+                extracted_data=extracted_data,
+            )
+
         return {"success": True, "error": None}
 
     except Exception as exc:
@@ -135,6 +148,17 @@ def _update_status_impl(document_id: str, status: str) -> dict[str, Any]:
         entity["updated_at"] = now
         
         client.put(entity)
+
+        # Trigger notification if status is complete
+        if status == "complete":
+            from backend.tools.notification_tool import send_completion_notification
+            send_completion_notification(
+                recipient_email=entity.get("sender_email", ""),
+                document_id=document_id,
+                filename=entity.get("filename", "document"),
+                extracted_data=entity.get("extracted_data", {}),
+            )
+
         return {"success": True, "error": None}
 
     except Exception as exc:

@@ -171,8 +171,8 @@ def verify_low_confidence_fields(
         llm_confidence = llm_result["confidence"]
         llm_value = llm_result["value"]
 
-        # Only accept the LLM's answer if it is more confident than Document AI
-        if llm_confidence is not None and llm_confidence > original_confidence:
+        # Only accept the LLM's answer if it found a value AND is more confident than Document AI
+        if llm_value and llm_confidence is not None and llm_confidence > original_confidence:
             old_value = field_data.get("value", "")
             logger.info(
                 "LLM improved field '%s': confidence %.2f → %.2f, value %r → %r.",

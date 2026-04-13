@@ -115,6 +115,10 @@ def download_from_gcs(blob_name: str) -> dict[str, Any]:
         # Generate a safe temporary path based on the original filename
         filename = os.path.basename(blob_name)
         temp_dir = tempfile.gettempdir()
+        
+        # Create temp_dir if it doesn't exist (in case it's a custom path like /tmp/invoices)
+        os.makedirs(temp_dir, exist_ok=True)
+        
         local_path = os.path.join(temp_dir, filename)
 
         blob.download_to_filename(local_path)
