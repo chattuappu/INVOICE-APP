@@ -6,7 +6,6 @@ const API = '/api';
 
 // ─── State ────────────────────────────────────────────────────
 let state = {
-  activeTab: 'invoice',        // 'invoice' | 'sales_tax'
   activeFilter: 'all',         // 'all' | 'complete' | 'pending' | 'in_progress'
   documents: [],               // raw documents from API
   currentDocId: null,          // document open in modal
@@ -54,9 +53,7 @@ function prettyField(key) {
 // ─── Load documents ───────────────────────────────────────────
 async function loadDocuments() {
   try {
-    const url = state.activeTab === 'invoice'
-      ? `${API}/documents?type=invoice`
-      : `${API}/documents?type=sales_tax`;
+    const url = `${API}/documents?type=invoice`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     state.documents = await res.json();
@@ -415,26 +412,6 @@ async function syncBucketFromGcs() {
   }
 }
 
-// ─── Tab switching ────────────────────────────────────────────
-function setActiveTab(tab) {
-  state.activeTab = tab;
-  state.activeFilter = 'all';
-
-  document.querySelectorAll('#mainTabs .tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tab);
-  });
-
-  document.querySelectorAll('.pill').forEach(p => {
-    p.classList.toggle('active', p.dataset.filter === 'all');
-  });
-
-  $('pageTitle').textContent = tab === 'invoice'
-    ? 'Invoice — Dashboard'
-    : 'Sales Tax Exempt — Dashboard';
-
-  loadDocuments();
-}
-
 // ─── Filter switching ─────────────────────────────────────────
 function setFilter(filter) {
   state.activeFilter = filter;
@@ -453,10 +430,8 @@ function setFilter(filter) {
 
 // ─── Event wiring ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Main tabs
-  document.querySelectorAll('#mainTabs .tab').forEach(btn => {
-    btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
-  });
+  // Set page title
+  $('pageTitle').textContent = 'Invoice — Dashboard';
 
   // Summary card buttons
   document.querySelectorAll('.card-btn').forEach(btn => {
